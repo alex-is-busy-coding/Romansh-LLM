@@ -1,0 +1,8 @@
+# Opt out of SageMaker metadata collection (telemetry) for training jobs.
+# See: https://docs.aws.amazon.com/sagemaker/latest/dg/data-privacy.html
+
+SchemaVersion: "1.0"
+SageMaker:
+  TrainingJob:
+    Environment:
+      OPT_OUT_TRACKING: "1"
