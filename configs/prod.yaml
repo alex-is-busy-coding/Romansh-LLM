@@ -1,0 +1,6 @@
+# Prod overrides (common.yaml is merged first). 
+# Use with ENV=prod.
+
+paths:
+  output_dir: "output/cpt"
+  run_name: "rhaeto-llm-cpt-prod"
