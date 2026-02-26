@@ -1,0 +1,22 @@
+# Dev overrides (common.yaml is merged first). 
+# Lighter model, 1 epoch. Use with ENV=dev.
+
+model:
+  name_or_path: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+
+paths:
+  output_dir: "output/cpt-dev"
+  run_name: "rhaeto-llm-cpt-dev"
+
+data:
+  max_length: 512
+
+qlora:
+  lora_r: 16
+  lora_alpha: 8
+
+training:
+  num_epochs: 1
+  gradient_accumulation_steps: 4
+  save_steps: 200
+  eval_steps: 200
