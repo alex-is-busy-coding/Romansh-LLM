@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/romansh-llm-logo.jpg" alt="Romansh-LLM logo" width="200">
+</p>
+
 # Romansh-LLM
 
 **A dialect-aware language model for all six Romansh varieties.**  
