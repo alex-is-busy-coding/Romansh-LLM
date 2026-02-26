@@ -1,0 +1,30 @@
+# Git and local env
+.git
+.gitignore
+.venv
+venv
+env
+.python-version
+
+# Outputs and cache
+output/
+.cache/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+wandb/
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+
+# IDE and OS
+.idea
+.vscode
+.DS_Store
+
+# Docs and dev
+README.md
+Makefile
+LICENSE
