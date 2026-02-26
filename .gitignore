@@ -74,6 +74,7 @@ terraform/.terraform/
 terraform/*.tfstate
 terraform/*.tfstate.*
 terraform/*.tfplan
+terraform/tfplan
 terraform/.terraform.tfstate.lock.info
 terraform/crash.*.log
 terraform/override.tf
