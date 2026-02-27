@@ -1,0 +1,20 @@
+# Checkov config for Romansh-LLM (Terraform in terraform/).
+# Scans are run with: checkov -d terraform (pre-commit or make tf-lint).
+
+framework:
+  - terraform
+
+# Skipped: intentional for this training infra (minimal ECR/S3, IAM user for automation).
+skip-check:
+  - CKV_AWS_136   # ECR KMS encryption (training image repo)
+  - CKV_AWS_51    # ECR immutable tags (dev convenience)
+  - CKV_AWS_273   # IAM user (automation user for Terraform/ECR/SageMaker)
+  - CKV_AWS_290   # IAM policy write without constraint (scoped to ECR/S3/SageMaker)
+  - CKV_AWS_40    # IAM policy on user (single automation user)
+  - CKV_AWS_355   # IAM policy "*" resource (narrow actions)
+  - CKV2_AWS_62   # S3 event notifications (training output bucket)
+  - CKV2_AWS_61   # S3 lifecycle (short-lived training output)
+  - CKV_AWS_18    # S3 access logging (training bucket)
+  - CKV_AWS_145   # S3 KMS encryption (training output)
+  - CKV_AWS_144   # S3 cross-region replication (not required)
+  - CKV_AWS_21    # S3 versioning (training artifacts)
