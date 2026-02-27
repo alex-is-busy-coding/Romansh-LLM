@@ -174,7 +174,7 @@ Enter the access key and secret for the Terraform-created user and your default 
 
 ## Pre-commit
 
-This project uses [pre-commit](https://pre-commit.com/) to run checks before each commit (trailing whitespace, YAML/TOML checks, [Ruff](https://docs.astral.sh/ruff/) linting and auto-fix).
+This project uses [pre-commit](https://pre-commit.com/) to run checks before each commit (trailing whitespace, YAML/TOML checks, [Ruff](https://docs.astral.sh/ruff/) linting and auto-fix). Terraform in `terraform/` is also linted (fmt, validate, [TFLint](https://github.com/terraform-linters/tflint), [Checkov](https://www.checkov.io/)); see [terraform/README.md](terraform/README.md#terraform-linting).
 
 **One-time setup:**
 
