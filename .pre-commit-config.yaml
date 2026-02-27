@@ -1,0 +1,27 @@
+# Pre-commit hooks for Romansh-LLM
+# Install: uv sync --extra dev && uv run pre-commit install
+# Run manually: uv run pre-commit run --all-files  (or: make pre-commit)
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: debug-statements
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-toml
+      - id: mixed-line-ending
+        args: [--fix, lf]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
