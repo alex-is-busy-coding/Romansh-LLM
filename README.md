@@ -13,7 +13,7 @@ Continued-pretrained on [ZurichNLP/quotidiana](https://huggingface.co/datasets/Z
 
 ## Why this project
 
-Romansh is Switzerland’s fourth national language, with six main written varieties: **Vallader**, **Puter**, **Sursilvan**, **Sutsilvan**, **Surmiran**, and **Rumantsch Grischun**. **Impact:** There is no public, open dialect-aware language model for Romansh; this project aims to be the first. **Realistic:** a single pipeline (data → continued pretraining) that runs on one GPU with QLoRA. Instruction tuning and evaluation are planned; the repo is ready to extend toward NMT when parallel data is available.
+Romansh is Switzerland’s fourth national language and a minority language with relatively few speakers but six distinct written varieties (**Vallader**, **Puter**, **Sursilvan**, **Sutsilvan**, **Surmiran**, **Rumantsch Grischun**). Most speakers live in **Graubünden** (Grisons). There is no public dialect-aware LLM for Romansh. This project aims to be the first. A **dialect-aware** model is useful in the real world for education and reading support in the local variety, media and publishing (e.g. *La Quotidiana*), public services in Graubünden (where most speakers live), and language preservation. Later it can support translation when parallel data exists. The pipeline is realistic. It runs on one GPU with QLoRA. Instruction tuning and NMT are planned when data is ready.
 
 ---
 
