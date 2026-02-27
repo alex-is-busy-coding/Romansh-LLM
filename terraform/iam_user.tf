@@ -48,9 +48,9 @@ resource "aws_iam_user_policy" "training" {
         Resource = "arn:aws:iam::${local.account_id}:role/${local.env_prefix}-sagemaker-training"
       },
       {
-        Sid    = "PassRole"
-        Effect = "Allow"
-        Action = "iam:PassRole"
+        Sid      = "PassRole"
+        Effect   = "Allow"
+        Action   = "iam:PassRole"
         Resource = "arn:aws:iam::${local.account_id}:role/${local.env_prefix}-sagemaker-training"
         Condition = {
           StringEquals = {

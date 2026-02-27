@@ -35,5 +35,14 @@ repos:
         files: ^terraform/.*\.(tf|tfvars|terraform\.lock\.hcl)$
       - id: terraform_tflint
         files: ^terraform/.*\.(tf|tfvars)$
+        args:
+          - --args=--chdir=__GIT_WORKING_DIR__/terraform
+
+  - repo: local
+    hooks:
       - id: terraform_checkov
+        name: Checkov
+        entry: uv run checkov -d terraform --framework terraform --quiet
+        language: system
+        pass_filenames: false
         files: ^terraform/.*\.(tf|tfvars)$

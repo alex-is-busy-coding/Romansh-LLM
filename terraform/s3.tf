@@ -2,7 +2,7 @@ resource "aws_s3_bucket" "training_output" {
   bucket = "${local.env_prefix}-training-${local.account_id}"
 
   tags = {
-    Project = var.project_name
+    Project     = var.project_name
     Environment = var.environment
   }
 }
