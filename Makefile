@@ -2,7 +2,7 @@
 # Use ENV=dev or ENV=prod to select config and Terraform environment (default: prod).
 
 .PHONY: download-data pretrain all help
-.PHONY: tf-init tf-plan tf-apply tf-destroy tf-output
+.PHONY: tf-init tf-plan tf-apply tf-destroy tf-output tf-lint
 .PHONY: docker-build docker-push sagemaker-launch aws-pretrain download-model job-status job-logs
 .PHONY: install-pre-commit pre-commit
 
@@ -24,6 +24,7 @@ help:
 	@echo "  make tf-apply          terraform apply (ENV=$(ENV))"
 	@echo "  make tf-destroy        terraform destroy (ENV=$(ENV))"
 	@echo "  make tf-output         show terraform outputs"
+	@echo "  make tf-lint           terraform fmt/validate, tflint, checkov (requires: terraform, tflint, uv sync --extra dev)"
 	@echo ""
 	@echo "Docker & SageMaker:"
 	@echo "  make docker-build      Build training image (local)"
@@ -62,6 +63,17 @@ tf-destroy:
 
 tf-output:
 	terraform -chdir=$(TF_DIR) output
+
+tf-lint: tf-init
+	@echo "Running terraform fmt -check..."
+	@terraform -chdir=$(TF_DIR) fmt -check -recursive
+	@echo "Running terraform validate..."
+	@terraform -chdir=$(TF_DIR) validate
+	@echo "Running tflint..."
+	@command -v tflint >/dev/null 2>&1 || { echo "Error: tflint not found. Install it (e.g. brew install tflint) and run 'tflint --init' in $(TF_DIR)/."; exit 1; }; \
+		tflint -f compact --chdir=$(TF_DIR)
+	@echo "Running checkov..."
+	@uv run checkov -d $(TF_DIR) --framework terraform --quiet
 
 docker-build:
 	docker build --platform linux/amd64 -t romansh-llm .
