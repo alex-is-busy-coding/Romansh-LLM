@@ -30,7 +30,7 @@ One-shot full flow: `make aws-pretrain ENV=prod` (optionally with `YES=1`, `SKIP
 
 ## Usage
 
-1. **Initialize and plan**  
+1. **Initialize and plan**
    From repo root (recommended): `make tf-init` then `make tf-plan ENV=prod` (or `ENV=dev`). Or from this directory:
    ```bash
    cd terraform
@@ -58,8 +58,8 @@ One-shot full flow: `make aws-pretrain ENV=prod` (optionally with `YES=1`, `SKIP
    ```
    From repo root: `make tf-output` shows all outputs.
 
-5. **Build, tag, push the image** (from repo root):  
-   **Recommended:** `make docker-push ENV=prod` (or `ENV=dev`). This uses Terraform outputs for the current environment.  
+5. **Build, tag, push the image** (from repo root):
+   **Recommended:** `make docker-push ENV=prod` (or `ENV=dev`). This uses Terraform outputs for the current environment.
    Or manually:
    ```bash
    aws ecr get-login-password --region $(terraform -chdir=terraform output -raw region) | \
@@ -69,8 +69,8 @@ One-shot full flow: `make aws-pretrain ENV=prod` (optionally with `YES=1`, `SKIP
    docker push $(terraform -chdir=terraform output -raw ecr_image_uri)
    ```
 
-6. **Launch a training job** (from repo root):  
-   **Recommended:** `make sagemaker-launch ENV=prod` (or `ENV=dev`). This picks the right image, role, S3 bucket (for the config channel), and config (`configs/prod.yaml` or `configs/dev.yaml`) from Terraform outputs. Set `HF_TOKEN` for gated models. The launcher prints `make job-status`, `make job-logs`, and `make download-model` with the job name.  
+6. **Launch a training job** (from repo root):
+   **Recommended:** `make sagemaker-launch ENV=prod` (or `ENV=dev`). This picks the right image, role, S3 bucket (for the config channel), and config (`configs/prod.yaml` or `configs/dev.yaml`) from Terraform outputs. Set `HF_TOKEN` for gated models. The launcher prints `make job-status`, `make job-logs`, and `make download-model` with the job name.
    Or manually:
    ```bash
    uv sync --extra aws
