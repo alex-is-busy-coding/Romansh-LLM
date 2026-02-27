@@ -13,6 +13,7 @@ Resources are **per environment** (`dev` or `prod`): e.g. `romansh-llm-dev-*` vs
 
 - [Terraform](https://www.terraform.io/downloads) >= 1.0
 - AWS CLI configured: run `uv sync --extra aws` then `uv run aws configure` (or set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` in CI)
+- For linting: [TFLint](https://github.com/terraform-linters/tflint) (e.g. `brew install tflint`), and `uv sync --extra dev` for checkov; run `tflint --init` once in this directory to install TFLint plugins.
 
 ## Make targets (from repo root)
 
@@ -23,10 +24,20 @@ Resources are **per environment** (`dev` or `prod`): e.g. `romansh-llm-dev-*` vs
 | `make tf-apply ENV=prod` | Create/update infra for that environment |
 | `make tf-output` | Show all Terraform outputs |
 | `make tf-destroy ENV=prod` | Destroy infra for that environment |
+| `make tf-lint` | Run Terraform fmt/validate, tflint, and checkov (see [Terraform linting](#terraform-linting)) |
 | `make docker-push ENV=prod` | Build and push training image to ECR |
 | `make sagemaker-launch ENV=prod` | Start SageMaker training job (uses config and bucket from Terraform) |
 
 One-shot full flow: `make aws-pretrain ENV=prod` (optionally with `YES=1`, `SKIP_TERRAFORM=1`, `SKIP_PUSH=1`). See main [README](../README.md#quick-start) for `make job-status`, `make job-logs`, `make download-model`.
+
+## Terraform linting
+
+Format, validate, lint, and run policy checks on the Terraform in this directory:
+
+- **From repo root:** `make tf-lint` — runs `terraform fmt -check`, `terraform validate`, [TFLint](https://github.com/terraform-linters/tflint) (using [terraform/.tflint.hcl](.tflint.hcl)), and [Checkov](https://www.checkov.io/) on `terraform/`.
+- **Pre-commit:** Terraform hooks run automatically on `terraform/*.tf` when you commit. Install once with `make install-pre-commit`; then `uv run pre-commit run --all-files` (or `make pre-commit`) runs all hooks including Terraform.
+
+**Setup:** Install TFLint (e.g. `brew install tflint`), run `uv sync --extra dev` for checkov, and from this directory run `tflint --init` once to install the Terraform and AWS ruleset plugins. Root config: [.checkov.yml](../.checkov.yml).
 
 ## Usage
 
