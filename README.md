@@ -4,7 +4,7 @@
 
 # Romansh-LLM
 
-**A dialect-aware language model for all six Romansh varieties.**  
+**A dialect-aware language model for all six Romansh varieties.**
 Continued-pretrained on [ZurichNLP/quotidiana](https://huggingface.co/datasets/ZurichNLP/quotidiana), the only large public Romansh corpus, with QLoRA and optional dialect tags. Instruction tuning and evaluation are planned. One repo, one clear goal: **better language modeling for Romansh.**
 
 **Run (TL;DR):** `uv sync` → `make download-data` → `make pretrain ENV=dev`. For AWS: `make aws-pretrain ENV=dev` (see [Quick start](#quick-start)).
@@ -51,13 +51,13 @@ All training uses the **quotidiana** corpus:
 
 ## Method
 
-1. **Continued pretraining (CPT)**  
+1. **Continued pretraining (CPT)**
    QLoRA on the base model over quotidiana. Dialect tags can be used so the model learns variety-specific patterns.
 
-2. **Instruction tuning (planned)**  
+2. **Instruction tuning (planned)**
    SFT with dialect in the prompt (e.g. “Answer in Vallader”) using synthetic instruction data—not yet implemented.
 
-3. **Hardware**  
+3. **Hardware**
    Single GPU; no large infrastructure. Configuration lives in `configs/` (see [Config](#config) below).
 
 ---
@@ -74,7 +74,7 @@ All training uses the **quotidiana** corpus:
 uv sync
 ```
 
-Check version: `uv run romansh-llm-pretrain -V` (or `--version`).  
+Check version: `uv run romansh-llm-pretrain -V` (or `--version`).
 Log level: set `LOG_LEVEL` (DEBUG, INFO, WARNING, ERROR) in the environment or `.env`, or pass `--log-level` to `romansh-llm-pretrain` and `launch_sagemaker_job.py`.
 
 ### 2. Local (no Docker)
@@ -108,8 +108,10 @@ Or: `make download-data` then `make pretrain`. Use `ENV=dev` for a lighter, fast
 | `make download-model` | Download trained model from SageMaker S3 (`JOB_NAME=...` required; unpacks to `output/sagemaker/<job>/final/`). The artifact is a Hugging Face–style model (base + QLoRA adapters); load with `transformers` and `peft` for inference or as a base for further fine-tuning. |
 | `make job-status` | Check SageMaker training job status in the terminal (`JOB_NAME=...` required; shows Status, Secondary, times, FailureReason if any) |
 | `make job-logs` | Show recent training job logs from CloudWatch (`JOB_NAME=...` required; last 2h; for live streaming use AWS CLI v2: `aws logs tail /aws/sagemaker/TrainingJobs --log-stream-name-prefix <JOB_NAME> --follow`) |
+| `make install-pre-commit` | Install pre-commit hooks (run once; requires `uv sync --extra dev`) |
+| `make pre-commit` | Run pre-commit on all files |
 
-Examples: `make pretrain ENV=dev` | `make aws-pretrain ENV=dev` | `make aws-pretrain ENV=prod`.  
+Examples: `make pretrain ENV=dev` | `make aws-pretrain ENV=dev` | `make aws-pretrain ENV=prod`.
 One-shot AWS: `ENV=prod make aws-pretrain` or `ENV=dev make aws-pretrain` (dev = lighter infra + smaller instance).
 
 ### 3. Config
@@ -167,6 +169,30 @@ Enter the access key and secret for the Terraform-created user and your default 
 3. **Launch the job:** `make sagemaker-launch ENV=prod` (or `ENV=dev` for a smaller instance and dev config). Requires `uv sync --extra aws` and Terraform applied for that ENV. Uploads the selected config as the **config** channel. Model artifacts are saved under `/opt/ml/model` and SageMaker copies them to the job’s output S3 path. The launcher prints the job name and the exact `make job-status`, `make job-logs`, and `make download-model` commands; training runs on AWS. Check status with those make targets or in the **SageMaker console** (Training → Training jobs). When the job has completed, download the model with `make download-model JOB_NAME=<training-job-name>`.
 
 4. **Without the Makefile:** Run `scripts/launch_sagemaker_job.py` with `--image-uri`, `--role`, and `--config`, or create a training job (console, CLI, or boto3) that uses your ECR image and a **config** input channel. The container entrypoint detects SageMaker (`SM_MODEL_DIR`) and runs the SageMaker training script automatically.
+
+---
+
+## Pre-commit
+
+This project uses [pre-commit](https://pre-commit.com/) to run checks before each commit (trailing whitespace, YAML/TOML checks, [Ruff](https://docs.astral.sh/ruff/) linting and auto-fix).
+
+**One-time setup:**
+
+```bash
+make install-pre-commit
+```
+
+Or manually: `uv sync --extra dev` then `uv run pre-commit install`.
+
+**Run on all files (without committing):**
+
+```bash
+make pre-commit
+```
+
+Or: `uv run pre-commit run --all-files`.
+
+Hooks run automatically on `git commit` once installed.
 
 ---
 
