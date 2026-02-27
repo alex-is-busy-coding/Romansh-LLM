@@ -4,6 +4,7 @@
 .PHONY: download-data pretrain all help
 .PHONY: tf-init tf-plan tf-apply tf-destroy tf-output
 .PHONY: docker-build docker-push sagemaker-launch aws-pretrain download-model job-status job-logs
+.PHONY: install-pre-commit pre-commit
 
 ENV ?= prod
 CONFIG ?= configs/$(ENV).yaml
@@ -33,6 +34,10 @@ help:
 	@echo "  make job-status        Check SageMaker training job status (requires JOB_NAME=...)"
 	@echo "  make job-logs          Stream training job logs from CloudWatch (requires JOB_NAME=...; Ctrl+C to stop)"
 	@echo ""
+	@echo "Development:"
+	@echo "  make install-pre-commit  Install pre-commit hooks (run once)"
+	@echo "  make pre-commit          Run pre-commit on all files"
+	@echo ""
 	@echo "Examples: make pretrain ENV=dev | make aws-pretrain ENV=dev | make download-model JOB_NAME=... | make job-status JOB_NAME=... | make job-logs JOB_NAME=..."
 
 download-data:
@@ -43,7 +48,6 @@ pretrain:
 
 all: download-data pretrain
 
-# --- Terraform (pass environment so resource names match ENV) ---
 tf-init:
 	terraform -chdir=$(TF_DIR) init
 
@@ -59,8 +63,6 @@ tf-destroy:
 tf-output:
 	terraform -chdir=$(TF_DIR) output
 
-# --- Docker (local build; push uses ECR from Terraform) ---
-# Build for linux/amd64 so the image runs on SageMaker (required when building on ARM e.g. Mac)
 docker-build:
 	docker build --platform linux/amd64 -t romansh-llm .
 
@@ -72,9 +74,6 @@ docker-push: docker-build
 	docker tag romansh-llm:latest $$uri; \
 	docker push $$uri
 
-# --- Download trained model from SageMaker S3 (default output path) ---
-# Requires JOB_NAME=... (the SageMaker training job name, e.g. from console or launcher output).
-# Downloads to output/sagemaker/$(JOB_NAME)/ and unpacks model.tar.gz -> final/
 download-model:
 	@if [ -z "$(JOB_NAME)" ]; then echo "Error: pass JOB_NAME=... (the SageMaker training job name)."; exit 1; fi; \
 	region=$${AWS_REGION:-$$AWS_DEFAULT_REGION}; [ -z "$$region" ] && region=$$(aws configure get region 2>/dev/null); \
@@ -89,7 +88,6 @@ download-model:
 	(cd "$$dest_dir" && tar -xzf model.tar.gz && echo "Unpacked model to $$dest_dir/final/") || \
 	{ echo "Download failed. Check JOB_NAME and that the job has completed."; exit 1; }
 
-# --- Check SageMaker training job status (requires JOB_NAME=...) ---
 job-status:
 	@if [ -z "$(JOB_NAME)" ]; then echo "Error: pass JOB_NAME=... (the SageMaker training job name)."; exit 1; fi; \
 	echo "Training job: $(JOB_NAME)"; echo ""; \
@@ -100,27 +98,29 @@ job-status:
 	ended_fmt=$$( [ "$$ended" = "None" ] && echo "None" || (date -r "$${ended%%.*}" '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -d "@$${ended%%.*}" '+%Y-%m-%d %H:%M:%S' 2>/dev/null) || echo "$$ended"); \
 	echo "Status:    $$status"; echo "Secondary: $$secondary"; echo "Started:   $$started_fmt"; echo "Ended:     $$ended_fmt"; echo "Failure:   $$failure"
 
-# --- Show SageMaker training job logs from CloudWatch (requires JOB_NAME=...; works with AWS CLI v1 and v2) ---
-# For live streaming with AWS CLI v2: aws logs tail /aws/sagemaker/TrainingJobs --log-stream-name-prefix $(JOB_NAME) --follow
 job-logs:
 	@if [ -z "$(JOB_NAME)" ]; then echo "Error: pass JOB_NAME=... (the SageMaker training job name)."; exit 1; fi; \
 	start=$$(($$(date +%s) - 7200)); start_ms=$$((start * 1000)); \
 	uv run aws logs filter-log-events --log-group-name /aws/sagemaker/TrainingJobs --log-stream-name-prefix "$(JOB_NAME)" --start-time $$start_ms --query 'events[*].message' --output text
 
-# --- SageMaker training job (uses Terraform outputs for image and role) ---
 sagemaker-launch:
 	@uri=$$(terraform -chdir=$(TF_DIR) output -raw ecr_image_uri 2>/dev/null); \
 	role=$$(terraform -chdir=$(TF_DIR) output -raw sagemaker_role_arn 2>/dev/null); \
 	bucket=$$(terraform -chdir=$(TF_DIR) output -raw s3_training_bucket 2>/dev/null); \
-	inst=$${INSTANCE_TYPE}; [ -z "$$inst" ] && inst=$$([ "$(ENV)" = "dev" ] && echo ml.g4dn.xlarge || echo ml.g5.xlarge); \
+	inst=$${INSTANCE_TYPE}; [ -z "$$inst" ] && inst=ml.g5.2xlarge; \
 	if [ -z "$$uri" ] || [ -z "$$role" ]; then echo "Run 'make tf-apply ENV=$(ENV)' first."; exit 1; fi; \
 	python $(SCRIPTS)/launch_sagemaker_job.py --image-uri $$uri --role $$role --config $(CONFIG) --instance-type "$$inst" --s3-bucket "$$bucket"
 
-# Full AWS pretraining: infra + push image + launch job for ENV (optional: YES=1, SKIP_TERRAFORM=1, SKIP_PUSH=1)
-# Prepend common Docker locations to PATH so "docker" is found when make runs with a minimal environment
 aws-pretrain:
 	@opts=""; \
 	[ "$(YES)" = "1" ] && opts="$$opts --yes"; \
 	[ "$(SKIP_TERRAFORM)" = "1" ] && opts="$$opts --skip-terraform"; \
 	[ "$(SKIP_PUSH)" = "1" ] && opts="$$opts --skip-push"; \
 	PATH="/usr/local/bin:/opt/homebrew/bin:$${PATH}" ENV=$(ENV) CONFIG=$(CONFIG) INSTANCE_TYPE=$${INSTANCE_TYPE} DOCKER=$${DOCKER} $(SCRIPTS)/run_aws_pretrain.sh $$opts
+
+install-pre-commit:
+	uv sync --extra dev
+	uv run pre-commit install
+
+pre-commit:
+	uv run pre-commit run --all-files
