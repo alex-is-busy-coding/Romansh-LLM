@@ -25,3 +25,15 @@ repos:
     hooks:
       - id: ruff
         args: [--fix]
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+        files: ^terraform/.*\.(tf|tfvars)$
+      - id: terraform_validate
+        files: ^terraform/.*\.(tf|tfvars|terraform\.lock\.hcl)$
+      - id: terraform_tflint
+        files: ^terraform/.*\.(tf|tfvars)$
+      - id: terraform_checkov
+        files: ^terraform/.*\.(tf|tfvars)$
