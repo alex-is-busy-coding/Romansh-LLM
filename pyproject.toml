@@ -35,13 +35,13 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "torch>=2.0.0",
-    "torchvision>=0.17.0,<0.18.0",
+    "torch>=2.4.0",
+    "torchvision>=0.19.0",
     "transformers>=4.36.0",
     "datasets>=2.14.0",
     "peft>=0.7.0",
     "accelerate>=0.25.0",
-    "bitsandbytes>=0.41.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "bitsandbytes>=0.46.1; sys_platform != 'darwin' or platform_machine != 'arm64'",
     "pyyaml>=6.0",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
@@ -54,6 +54,7 @@ dependencies = [
 dev = [
     "pytest>=7.0",
     "ruff>=0.1.0",
+    "pre-commit>=3.6.0",
 ]
 logging = [
     "wandb>=0.16.0",
@@ -71,3 +72,7 @@ Documentation = "https://github.com/alex-is-busy-coding/Romansh-LLM"
 
 [project.scripts]
 romansh-llm-pretrain = "romansh_llm.train.pretrain:main"
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/launch_sagemaker_job.py" = ["E402"]
+"src/romansh_llm/train/pretrain.py" = ["E402"]
